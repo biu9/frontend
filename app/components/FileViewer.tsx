@@ -10,9 +10,10 @@ interface FileViewerProps {
   filePath: string;
   content: string;
   success?: boolean;
+  totalLines?: number;
 }
 
-const FileViewer: React.FC<FileViewerProps> = ({ filePath, content, success = true }) => {
+const FileViewer: React.FC<FileViewerProps> = ({ filePath, content, success = true, totalLines }) => {
   const getFileExtension = (path: string) => path.split('.').pop()?.toLowerCase() || '';
   const getFileName = (path: string) => path.split('/').pop() || path;
   
@@ -34,7 +35,11 @@ const FileViewer: React.FC<FileViewerProps> = ({ filePath, content, success = tr
         {getFileIcon(fileExtension)}
         <Text strong>{fileName}</Text>
         <Text type="secondary">{filePath}</Text>
-        {success ? <Tag icon={<CheckCircleOutlined />} color="success">成功</Tag> : <Tag icon={<CloseCircleOutlined />} color="error">失败</Tag>}
+        {success ? 
+          <Tag icon={<CheckCircleOutlined />} color="success">成功</Tag> : 
+          <Tag icon={<CloseCircleOutlined />} color="error">失败</Tag>
+        }
+        {totalLines && <Tag color="blue">{totalLines} 行</Tag>}
     </Space>
   );
 
