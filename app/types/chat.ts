@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // 聊天相关的类型定义
 
 export interface ToolCall {

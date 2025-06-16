@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
 import React from 'react';
@@ -13,7 +14,7 @@ interface FinalResponseProps {
   id?: string;
 }
 
-const FinalResponse: React.FC<FinalResponseProps> = ({ content, id }) => {
+const FinalResponse: React.FC<FinalResponseProps> = ({ content }) => {
   // 自定义 markdown 组件样式
   const markdownComponents = {
     // 标题样式
