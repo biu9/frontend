@@ -78,7 +78,13 @@ export function exampleTransformData() {
 /**
  * 处理动态数据的通用函数
  */
-export function processAndTransformChatData(rawData: any[]): any {
+export function processAndTransformChatData(rawData: unknown[]): {
+  success: boolean;
+  data?: unknown;
+  summary?: string;
+  error?: string;
+  timestamp: string;
+} {
   try {
     // 验证数据
     const validation = validateChatData(rawData);
@@ -107,10 +113,10 @@ export function processAndTransformChatData(rawData: any[]): any {
 /**
  * 批量处理多个聊天会话
  */
-export function batchProcessChatSessions(sessions: any[][]): Array<{
+export function batchProcessChatSessions(sessions: unknown[][]): Array<{
   sessionId: string;
   success: boolean;
-  data?: any;
+  data?: unknown;
   error?: string;
 }> {
   return sessions.map((sessionData, index) => {

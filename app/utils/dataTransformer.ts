@@ -114,7 +114,7 @@ export function extractToolName(content: string): string {
 /**
  * 从工具调用内容中提取参数
  */
-export function extractToolArguments(content: string): Record<string, any> {
+export function extractToolArguments(content: string): Record<string, unknown> {
   const match = content.match(/<arguments>(.*?)<\/arguments>/s);
   if (!match) return {};
 
@@ -202,7 +202,7 @@ export function generateConversationSummary(chatData: ChatData): string {
 /**
  * 验证聊天数据格式
  */
-export function validateChatData(rawData: any[]): {
+export function validateChatData(rawData: unknown[]): {
   isValid: boolean;
   errors: string[];
 } {
@@ -219,19 +219,19 @@ export function validateChatData(rawData: any[]): {
   }
 
   // 检查第一个项目是否为用户消息
-  const firstItem = rawData[0];
+  const firstItem = rawData[0] as Record<string, unknown>;
   if (
     !firstItem ||
     firstItem.type !== "message" ||
     !firstItem.data ||
-    firstItem.data.role !== "user"
+    (firstItem.data as Record<string, unknown>).role !== "user"
   ) {
     errors.push("第一个消息必须是用户消息");
   }
 
   // 检查是否有最终回复
   const hasFinalResponse = rawData.some(
-    (item) => item.type === "finalResponse"
+    (item) => (item as Record<string, unknown>).type === "finalResponse"
   );
   if (!hasFinalResponse) {
     errors.push("缺少最终回复");
@@ -242,10 +242,12 @@ export function validateChatData(rawData: any[]): {
   let userCount = 0;
 
   for (const item of rawData) {
-    if (item.type === "message" && item.data) {
-      if (item.data.role === "assistant") {
+    const typedItem = item as Record<string, unknown>;
+    if (typedItem.type === "message" && typedItem.data) {
+      const data = typedItem.data as Record<string, unknown>;
+      if (data.role === "assistant") {
         assistantCount++;
-      } else if (item.data.role === "user") {
+      } else if (data.role === "user") {
         userCount++;
       }
     }

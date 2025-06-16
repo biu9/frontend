@@ -1,6 +1,14 @@
 // 内容解析工具函数
 import { ToolCall, ToolExecutionResult, ParsedContent, FileResult } from '../types/chat';
 
+interface RawChatMessage {
+  type: 'message' | 'finalResponse';
+  data: {
+    role?: 'user' | 'assistant';
+    content: string;
+  } | string;
+}
+
 /**
  * 解析工具调用XML
  */
@@ -364,8 +372,15 @@ function isToolExecutionResult(content: string): boolean {
  * 转换聊天数据格式的主函数
  * 将原始格式转换为可供前端渲染的结构化数据
  */
-export function transformChatData(rawData: any[]): any {
-  const items: any[] = [];
+export function transformChatData(rawData: RawChatMessage[]): {
+  items: unknown[];
+  metadata: {
+    sessionId: string;
+    createdAt: Date;
+    updatedAt: Date;
+  };
+} {
+  const items: unknown[] = [];
   let currentPairIndex = 0;
 
   for (let i = 0; i < rawData.length; i++) {
@@ -378,7 +393,7 @@ export function transformChatData(rawData: any[]): any {
         id: `final-${i}`
       });
     } else if (item.type === 'message') {
-      const { role, content } = item.data;
+      const { role } = item.data as { role: 'user' | 'assistant'; content: string };
       
       if (role === 'user') {
         if (i === 0) {
@@ -387,7 +402,7 @@ export function transformChatData(rawData: any[]): any {
             ...item,
             id: `user-${i}`,
             data: {
-              ...item.data,
+              ...(item.data as object),
               timestamp: new Date()
             }
           });
@@ -397,7 +412,7 @@ export function transformChatData(rawData: any[]): any {
             ...item,
             id: `result-${currentPairIndex}`,
             data: {
-              ...item.data,
+              ...(item.data as object),
               timestamp: new Date()
             }
           });
@@ -408,7 +423,7 @@ export function transformChatData(rawData: any[]): any {
           ...item,
           id: `assistant-${currentPairIndex}`,
           data: {
-            ...item.data,
+            ...(item.data as object),
             timestamp: new Date()
           }
         });
