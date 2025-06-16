@@ -207,8 +207,8 @@ function extractNormalContent(content: string): string {
   // 移除工具调用标签
   const withoutToolCalls = content.replace(/<use_tool>.*?<\/use_tool>/gs, '').trim();
   
-  // 如果是纯工具执行结果，返回空字符串
-  if (content.includes('FileReadTool(') || content.includes('Batch operation')) {
+  // 如果是工具执行结果，返回空字符串
+  if (isToolExecutionResult(content)) {
     return '';
   }
 
@@ -279,15 +279,30 @@ function extractToolResults(content: string): ToolExecutionResult[] {
   }
 
   // 检查JSON格式的结果
-  else {
+  if (results.length === 0) {
     try {
-      const parsed = JSON.parse(content);
+      const parsed = JSON.parse(content.trim());
+      
+      // 处理有success字段的结果
       if (parsed.success !== undefined) {
-        results.push({
-          success: parsed.success,
-          data: parsed.data,
-          error: parsed.error
-        });
+        // 如果是文件读取结果，提取文件信息
+        if (parsed.data && parsed.data.filePath && parsed.data.content) {
+          results.push({
+            success: parsed.success,
+            files: [{
+              filePath: parsed.data.filePath,
+              content: parsed.data.content,
+              success: parsed.success,
+              totalLines: parsed.data.totalLines
+            }]
+          });
+        } else {
+          results.push({
+            success: parsed.success,
+            data: parsed.data,
+            error: parsed.error
+          });
+        }
       }
     } catch {
       // 不是JSON格式的结果
@@ -323,19 +338,21 @@ function extractFileResults(content: string): FileResult[] {
     });
   }
 
-  // 尝试解析JSON格式的文件结果
-  try {
-    const parsed = JSON.parse(content);
-    if (parsed.success && parsed.data && parsed.data.filePath && parsed.data.content) {
-      fileResults.push({
-        filePath: parsed.data.filePath,
-        content: parsed.data.content,
-        success: true,
-        totalLines: parsed.data.totalLines
-      });
+  // 如果没有找到标准格式，尝试解析JSON格式的文件结果
+  if (fileResults.length === 0) {
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed.success && parsed.data && parsed.data.filePath && parsed.data.content) {
+        fileResults.push({
+          filePath: parsed.data.filePath,
+          content: parsed.data.content,
+          success: true,
+          totalLines: parsed.data.totalLines
+        });
+      }
+    } catch {
+      // 不是JSON格式
     }
-  } catch {
-    // 不是JSON格式
   }
 
   return fileResults;
@@ -361,11 +378,27 @@ function checkForErrors(content: string, toolResults: ToolExecutionResult[]): bo
  * 判断是否为工具执行结果
  */
 function isToolExecutionResult(content: string): boolean {
-  return content.includes('FileReadTool(') || 
-         content.includes('Batch operation') ||
-         content.includes('completed') ||
-         content.includes('✅') ||
-         content.includes('✗');
+  // 检查传统格式
+  if (content.includes('FileReadTool(') || 
+      content.includes('Batch operation') ||
+      content.includes('completed') ||
+      content.includes('✅') ||
+      content.includes('✗')) {
+    return true;
+  }
+  
+  // 检查JSON格式
+  try {
+    const parsed = JSON.parse(content.trim());
+    // 如果是有success字段的JSON，认为是工具执行结果
+    if (parsed.hasOwnProperty('success')) {
+      return true;
+    }
+  } catch {
+    // 不是有效JSON
+  }
+  
+  return false;
 }
 
 /**
