@@ -83,7 +83,6 @@ export function processAndTransformChatData(rawData: unknown[]): {
   data?: unknown;
   summary?: string;
   error?: string;
-  timestamp: string;
 } {
   try {
     // 验证数据
@@ -99,13 +98,11 @@ export function processAndTransformChatData(rawData: unknown[]): {
       success: true,
       data: transformed,
       summary: generateConversationSummary(transformed),
-      timestamp: new Date().toISOString(),
     };
   } catch (error) {
     return {
       success: false,
       error: error instanceof Error ? error.message : "未知错误",
-      timestamp: new Date().toISOString(),
     };
   }
 }

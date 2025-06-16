@@ -32,7 +32,6 @@ const ChatContainer: React.FC<ChatContainerProps> = ({ data }) => {
               key={item.id || index}
               role={messageData.role}
               content={messageData.content}
-              timestamp={messageData.timestamp}
             />
           );
         } 

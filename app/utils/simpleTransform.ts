@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * 简化版聊天数据转换函数
  * 
@@ -40,8 +41,7 @@ export function transformToRenderableFormat(rawData: any[]): any {
         type: 'message',
         data: {
           role,
-          content,
-          timestamp: new Date()
+          content
         },
         id: `message-${messageIndex}-${Date.now()}`
       });

@@ -47,7 +47,6 @@ export function transformChatData(rawData: RawChatMessage[]): ChatData {
             data: {
               role: "user",
               content,
-              timestamp: new Date(),
             },
             id: `user-initial-${Date.now()}`,
           });
@@ -58,7 +57,6 @@ export function transformChatData(rawData: RawChatMessage[]): ChatData {
             data: {
               role: "user",
               content: formatToolResult(content),
-              timestamp: new Date(),
             },
             id: `tool-result-${pairIndex}-${Date.now()}`,
           });
@@ -70,7 +68,6 @@ export function transformChatData(rawData: RawChatMessage[]): ChatData {
           data: {
             role: "assistant",
             content,
-            timestamp: new Date(),
           },
           id: `tool-call-${pairIndex}-${Date.now()}`,
         });

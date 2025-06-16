@@ -5,7 +5,6 @@ import { Avatar, Card, Space, Typography, Tag, Divider } from 'antd';
 import { UserOutlined, RobotOutlined, ToolOutlined, ExclamationCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import ToolCallVisualization from './ToolCallVisualization';
 import FileViewer from './FileViewer';
-import TimeStamp from './TimeStamp';
 import { parseMessageContent, getMessageSummary } from '../utils/contentParser';
 
 const { Text, Paragraph } = Typography;
@@ -13,10 +12,9 @@ const { Text, Paragraph } = Typography;
 interface MessageItemProps {
   role: 'user' | 'assistant';
   content: string;
-  timestamp?: Date;
 }
 
-const MessageItem: React.FC<MessageItemProps> = ({ role, content, timestamp }) => {
+const MessageItem: React.FC<MessageItemProps> = ({ role, content }) => {
   // 解析消息内容
   const parsed = parseMessageContent(content);
   const { normalContent, toolCalls, toolResults, hasError } = parsed;
@@ -164,7 +162,6 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content, timestamp }) =
           title={
             <Space>
               <Text strong>{author}</Text>
-              <TimeStamp timestamp={timestamp} />
               {hasError && <Tag color="error">有错误</Tag>}
               {isToolResult && <Tag color="processing">工具结果</Tag>}
             </Space>

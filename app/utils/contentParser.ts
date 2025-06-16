@@ -400,32 +400,20 @@ export function transformChatData(rawData: RawChatMessage[]): {
           // 第一个用户消息，直接添加
           items.push({
             ...item,
-            id: `user-${i}`,
-            data: {
-              ...(item.data as object),
-              timestamp: new Date()
-            }
+            id: `user-${i}`
           });
         } else {
           // 后续的用户消息作为工具执行结果
           items.push({
             ...item,
-            id: `result-${currentPairIndex}`,
-            data: {
-              ...(item.data as object),
-              timestamp: new Date()
-            }
+            id: `result-${currentPairIndex}`
           });
         }
       } else if (role === 'assistant') {
         // AI助手消息作为工具调用
         items.push({
           ...item,
-          id: `assistant-${currentPairIndex}`,
-          data: {
-            ...(item.data as object),
-            timestamp: new Date()
-          }
+          id: `assistant-${currentPairIndex}`
         });
         currentPairIndex++;
       }
