@@ -6,18 +6,22 @@ import { UserOutlined, RobotOutlined, ToolOutlined, ExclamationCircleOutlined, C
 import ToolCallVisualization from './ToolCallVisualization';
 import FileViewer from './FileViewer';
 import { parseMessageContent, getMessageSummary } from '../utils/contentParser';
+import { ChatMessageContent } from '../utils/dataTransformer';
 
 const { Text, Paragraph } = Typography;
 
 interface MessageItemProps {
   role: 'user' | 'assistant';
-  content: string;
+  content: string | ChatMessageContent; // 支持新的数据类型
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ role, content }) => {
-  // 解析消息内容
-  const parsed = parseMessageContent(content);
-  const { normalContent, toolCalls, toolResults, hasError } = parsed;
+  // 如果content是对象类型，直接使用；否则解析字符串
+  const contentData = typeof content === 'string' ? 
+    parseMessageContent(content) : 
+    parseContentObject(content);
+    
+  const { normalContent, toolCalls, toolResults, hasError } = contentData;
   
   // 判断显示逻辑：工具执行结果应该显示为AI助手消息
   const isToolResult = toolResults.length > 0;
@@ -27,6 +31,50 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content }) => {
   const avatar = displayAsUser ? 
     <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} /> : 
     <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#7265e6' }} />;
+
+  // 解析ChatMessageContent对象
+  function parseContentObject(contentObj: ChatMessageContent) {
+    if (typeof contentObj === 'string') {
+      return parseMessageContent(contentObj);
+    } else if ('toolName' in contentObj) {
+      // 工具调用
+      return {
+        normalContent: '',
+        toolCalls: [{
+          tool_name: contentObj.toolName,
+          arguments: contentObj.arguments
+        }],
+        toolResults: [],
+        hasError: false
+      };
+    } else if ('success' in contentObj) {
+      // 工具执行结果
+      const fileResult = contentObj.data ? {
+        filePath: contentObj.data.filePath,
+        content: contentObj.data.content,
+        success: contentObj.success,
+        totalLines: contentObj.data.totalLines
+      } : undefined;
+      
+      return {
+        normalContent: '',
+        toolCalls: [],
+        toolResults: [{
+          success: contentObj.success,
+          files: fileResult ? [fileResult] : []
+        }],
+        hasError: !contentObj.success
+      };
+    }
+    
+    // 默认情况
+    return {
+      normalContent: JSON.stringify(contentObj),
+      toolCalls: [],
+      toolResults: [],
+      hasError: false
+    };
+  }
 
   // 渲染工具调用部分
   const renderToolCalls = () => {
@@ -112,7 +160,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content }) => {
                 maxHeight: '200px',
                 overflowY: 'auto'
               }}>
-                {content}
+                {typeof content === 'string' ? content : JSON.stringify(content, null, 2)}
               </pre>
             </details>
           </Card>
@@ -168,7 +216,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content }) => {
           }
           extra={
             <Text type="secondary" style={{ fontSize: '12px' }}>
-              {getMessageSummary(content)}
+              {typeof content === 'string' ? 
+                getMessageSummary(content) : 
+                getContentSummary(content)
+              }
             </Text>
           }
         >
@@ -178,5 +229,17 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content }) => {
     </div>
   );
 };
+
+// 为ChatMessageContent对象生成摘要
+function getContentSummary(content: ChatMessageContent): string {
+  if (typeof content === 'string') {
+    return content.length > 30 ? content.substring(0, 30) + '...' : content;
+  } else if ('toolName' in content) {
+    return `调用 ${content.toolName}`;
+  } else if ('success' in content) {
+    return content.success ? '执行成功' : '执行失败';
+  }
+  return '数据对象';
+}
 
 export default MessageItem; 

@@ -18,32 +18,52 @@ const rawChatData: RawChatMessage[] = [
     type: "message",
     data: {
       role: "assistant",
-      content:
-        '<use_tool>\n  <tool_name>FileReadTool</tool_name>\n  <arguments>\n    {"file_path":"/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/MessageItem.tsx"}\n  </arguments>\n</use_tool>',
+      content: {
+        toolName: "FileReadTool",
+        arguments: {
+          file_path: "/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/MessageItem.tsx"
+        }
+      },
     },
   },
   {
     type: "message",
     data: {
       role: "user",
-      content:
-        '{"success":true,"data":{"filePath":"/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/MessageItem.tsx","content":"\'use client\';\\n\\nimport React from \'react\';"}}',
+      content: {
+        success: true,
+        data: {
+          filePath: "/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/MessageItem.tsx",
+          content: "'use client';\n\nimport React from 'react';",
+          totalLines: 231
+        }
+      },
     },
   },
   {
     type: "message",
     data: {
       role: "assistant",
-      content:
-        '<use_tool>\n  <tool_name>FileReadTool</tool_name>\n  <arguments>\n    {"file_path":"/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/ToolCallVisualization.tsx"}\n  </arguments>\n</use_tool>',
+      content: {
+        toolName: "FileReadTool",
+        arguments: {
+          file_path: "/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/ToolCallVisualization.tsx"
+        }
+      },
     },
   },
   {
     type: "message",
     data: {
       role: "user",
-      content:
-        '{"success":true,"data":{"filePath":"/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/ToolCallVisualization.tsx","content":"\'use client\';"}}',
+      content: {
+        success: true,
+        data: {
+          filePath: "/Users/taohongyu/Desktop/insight/kai-node-demo/frontend/app/components/ToolCallVisualization.tsx",
+          content: "'use client';\n\nimport React, { useState } from 'react';",
+          totalLines: 223
+        }
+      },
     },
   },
   {

@@ -251,6 +251,14 @@ export default function Home() {
             >
               数据转换工具
             </Button>
+            <Button 
+              type="link" 
+              href="/new-format"
+              target="_blank"
+              style={{ fontSize: "12px" }}
+            >
+              新格式演示
+            </Button>
             {chatData.metadata?.sessionId && (
               <span style={{ color: "#666", fontSize: "12px" }}>
                 会话ID: {chatData.metadata.sessionId}

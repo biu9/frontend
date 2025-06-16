@@ -1,13 +1,6 @@
 // 内容解析工具函数
 import { ToolCall, ToolExecutionResult, ParsedContent, FileResult } from '../types/chat';
-
-interface RawChatMessage {
-  type: 'message' | 'finalResponse';
-  data: {
-    role?: 'user' | 'assistant';
-    content: string;
-  } | string;
-}
+import { RawChatMessage } from './dataTransformer';
 
 /**
  * 解析工具调用XML

@@ -1,11 +1,23 @@
 import { ChatData, ChatItem } from "../types/chat";
 
+export type ChatMessageContent = {
+  toolName: string;
+  arguments: Record<string, unknown>;
+} | {
+  success: boolean;
+  data: {
+    filePath: string;
+    content: string;
+    totalLines?: number;
+  };
+} | string; // 支持普通文本内容
+
 export interface RawChatMessage {
   type: "message" | "finalResponse";
   data:
     | {
         role?: "user" | "assistant";
-        content: string;
+        content: ChatMessageContent;
       }
     | string;
 }
@@ -46,7 +58,7 @@ export function transformChatData(rawData: RawChatMessage[]): ChatData {
             type: "message",
             data: {
               role: "user",
-              content,
+              content: formatContentToString(content),
             },
             id: `user-initial-${Date.now()}`,
           });
@@ -56,7 +68,7 @@ export function transformChatData(rawData: RawChatMessage[]): ChatData {
             type: "message",
             data: {
               role: "user",
-              content: formatToolResult(content),
+              content: formatContentToString(content),
             },
             id: `tool-result-${pairIndex}-${Date.now()}`,
           });
@@ -67,7 +79,7 @@ export function transformChatData(rawData: RawChatMessage[]): ChatData {
           type: "message",
           data: {
             role: "assistant",
-            content,
+            content: formatContentToString(content),
           },
           id: `tool-call-${pairIndex}-${Date.now()}`,
         });
@@ -87,17 +99,24 @@ export function transformChatData(rawData: RawChatMessage[]): ChatData {
 }
 
 /**
- * 格式化工具执行结果，确保JSON格式正确
+ * 将ChatMessageContent转换为字符串格式
  */
-function formatToolResult(content: string): string {
-  try {
-    // 尝试解析JSON并重新格式化
-    const parsed = JSON.parse(content);
-    return JSON.stringify(parsed, null, 2);
-  } catch {
-    // 如果不是有效JSON，直接返回原内容
+function formatContentToString(content: ChatMessageContent): string {
+  if (typeof content === "string") {
     return content;
+  } else if ("toolName" in content) {
+    // 工具调用格式
+    return `<use_tool>
+  <tool_name>${content.toolName}</tool_name>
+  <arguments>
+    ${JSON.stringify(content.arguments, null, 4)}
+  </arguments>
+</use_tool>`;
+  } else if ("success" in content) {
+    // 工具执行结果格式
+    return JSON.stringify(content, null, 2);
   }
+  return JSON.stringify(content);
 }
 
 /**
