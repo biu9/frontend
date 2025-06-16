@@ -242,13 +242,21 @@ export default function Home() {
           <Title level={3} style={{ margin: 0 }}>
             AI 对话可视化
           </Title>
-          {chatData.metadata?.sessionId && (
-            <span
-              style={{ marginLeft: "auto", color: "#666", fontSize: "12px" }}
+          <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "16px" }}>
+            <Button 
+              type="link" 
+              href="/test-transform"
+              target="_blank"
+              style={{ fontSize: "12px" }}
             >
-              会话ID: {chatData.metadata.sessionId}
-            </span>
-          )}
+              数据转换工具
+            </Button>
+            {chatData.metadata?.sessionId && (
+              <span style={{ color: "#666", fontSize: "12px" }}>
+                会话ID: {chatData.metadata.sessionId}
+              </span>
+            )}
+          </div>
         </div>
       </Header>
       <Content

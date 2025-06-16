@@ -17,14 +17,16 @@ interface MessageItemProps {
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ role, content, timestamp }) => {
-  const isUser = role === 'user';
-  
   // 解析消息内容
   const parsed = parseMessageContent(content);
   const { normalContent, toolCalls, toolResults, hasError } = parsed;
   
-  const author = isUser ? '用户' : 'AI助手';
-  const avatar = isUser ? 
+  // 判断显示逻辑：工具执行结果应该显示为AI助手消息
+  const isToolResult = toolResults.length > 0;
+  const displayAsUser = role === 'user' && !isToolResult;
+  
+  const author = displayAsUser ? '用户' : 'AI助手';
+  const avatar = displayAsUser ? 
     <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} /> : 
     <Avatar icon={<RobotOutlined />} style={{ backgroundColor: '#7265e6' }} />;
 
@@ -141,7 +143,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content, timestamp }) =
   return (
     <div style={{
       display: 'flex',
-      justifyContent: isUser ? 'flex-end' : 'flex-start',
+      justifyContent: displayAsUser ? 'flex-end' : 'flex-start',
       marginBottom: '24px'
     }}>
       <div style={{
@@ -149,14 +151,14 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content, timestamp }) =
         display: 'flex',
         gap: '12px',
         alignItems: 'flex-start',
-        flexDirection: isUser ? 'row-reverse' : 'row'
+        flexDirection: displayAsUser ? 'row-reverse' : 'row'
       }}>
         {avatar}
         <Card
           size="small"
           style={{
-            background: isUser ? '#e6f7ff' : '#fff',
-            borderColor: isUser ? '#91d5ff' : '#f0f0f0',
+            background: displayAsUser ? '#e6f7ff' : '#fff',
+            borderColor: displayAsUser ? '#91d5ff' : '#f0f0f0',
             minWidth: '200px'
           }}
           title={
@@ -164,6 +166,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ role, content, timestamp }) =
               <Text strong>{author}</Text>
               <TimeStamp timestamp={timestamp} />
               {hasError && <Tag color="error">有错误</Tag>}
+              {isToolResult && <Tag color="processing">工具结果</Tag>}
             </Space>
           }
           extra={
